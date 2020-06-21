@@ -1,0 +1,23 @@
+{
+  "name": "new_project",
+  "version": "1.0.0",
+  "description": "this is photogallery",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DmitriyStoyanov1/newProject.git"
+  },
+  "author": "Dmitriy Stoyanov dm@google.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DmitriyStoyanov1/newProject/issues"
+  },
+  "homepage": "https://github.com/DmitriyStoyanov1/newProject#readme",
+  "devDependencies": {
+    "nodemon": "^2.0.4"
+  }
+}
