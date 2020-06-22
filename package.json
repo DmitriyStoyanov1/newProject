@@ -4,8 +4,7 @@
   "description": "this is photogallery",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "dev": "nodemon index.js"
+    "start": "browser-sync start --server --watch"
   },
   "repository": {
     "type": "git",
@@ -18,6 +17,6 @@
   },
   "homepage": "https://github.com/DmitriyStoyanov1/newProject#readme",
   "devDependencies": {
-    "nodemon": "^2.0.4"
+    "browser-sync": "^2.26.7"
   }
 }
