@@ -82,9 +82,11 @@ footer .foot-logo {
   left: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
+  display: none;
 }
 
 .modal-window {
+  position: relative;
   background: white;
   width: 619px;
   height: 425px;
@@ -99,6 +101,12 @@ footer .foot-logo {
   font-weight: normal;
   font-size: 13px;
   line-height: 15px;
+}
+
+.modal-window a {
+  position: absolute;
+  top: 21px;
+  right: 21px;
 }
 
 .modal-content-container {
@@ -131,6 +139,7 @@ footer .foot-logo {
   align-items: center;
   color: #CCCCCC;
   padding-left: 11px;
+  margin-bottom: 20px;
 }
 
 input::placeholder {
@@ -147,6 +156,7 @@ input::placeholder {
   align-items: center;
   justify-content: center;
   color: #FFFFFF;
+  cursor: pointer;
 }
 
 .modal-comment-container .comment span {
