@@ -1,106 +1,106 @@
 const photosRequest = 'https://boiling-refuge-66454.herokuapp.com/images';
 
-document.addEventListener("DOMContentLoaded", function(event) {
+document.addEventListener("DOMContentLoaded", function (event) {
 
-let firstRowImgs = document.querySelectorAll('.row-1 img');
-let secondRowImgs = document.querySelectorAll('.row-2 img');
+  let firstRowImgs = document.querySelectorAll('.row-1 img');
+  let secondRowImgs = document.querySelectorAll('.row-2 img');
 
-function sendRequest(method, url) {
-  return fetch(url).then(response => {
-    return response.json();
-  })
-}
+  function sendRequest(method, url) {
+    return fetch(url).then(response => {
+      return response.json();
+    })
+  }
 
-const imgObject = sendRequest('GET', photosRequest)
-  .then(pictures => {
-    let firstRowImgs = document.querySelectorAll('.row-1 img');
-    let secondRowImgs = document.querySelectorAll('.row-2 img');
+  const imgObject = sendRequest('GET', photosRequest)
+    .then(pictures => {
+      let firstRowImgs = document.querySelectorAll('.row-1 img');
+      let secondRowImgs = document.querySelectorAll('.row-2 img');
 
-    for (let i = 0; i < pictures.length; i++) {
-    if (i < 3) {
-      firstRowImgs[i].src = pictures[i].url;
-      firstRowImgs[i].dataset.id = pictures[i].id;
-      } else {
-      secondRowImgs[i - 3].src = pictures[i].url;
-      secondRowImgs[i - 3].dataset.id = pictures[i].id;
+      for (let i = 0; i < pictures.length; i++) {
+        if (i < 3) {
+          firstRowImgs[i].src = pictures[i].url;
+          firstRowImgs[i].dataset.id = pictures[i].id;
+        } else {
+          secondRowImgs[i - 3].src = pictures[i].url;
+          secondRowImgs[i - 3].dataset.id = pictures[i].id;
+        }
       }
-    }
-    console.log(pictures)
-  })
-  .catch(err => console.log(err));
+      console.log(pictures)
+    })
+    .catch(err => console.log(err));
 
-  const bigImgObject = function(target, currentRequest) {
+  const bigImgObject = function (target, currentRequest) {
     if (target.tagName === 'IMG') {
       const modal = document.querySelector('.modal');
       modal.style.display = 'block';
       const bigPicRequest = sendRequest('GET', currentRequest)
-      .then(picture => {
-        bigPic.src = picture.url;
-        bigPic.dataset.id = picture.id;
-        console.log(picture)
+        .then(picture => {
+          bigPic.src = picture.url;
+          bigPic.dataset.id = picture.id;
+          console.log(picture)
 
-        const dateSpan = document.querySelector('.modal-comment-container');
-        if (picture.comments[0].text && picture.comments[0].date) {
-          let date = new Date(picture.comments[0].date);
-          console.log(date)
-          dateSpan.innerHTML = `<div class="comment"><span>${date.getDate()}. ${date.getMonth() + 1}. ${date.getFullYear()}</span></div>`;
-          dateSpan.innerHTML += `<div class="comment"><p>${picture.comments[0].text}</p></div>`;
-        }
+          const dateSpan = document.querySelector('.modal-comment-container');
+          if (picture.comments[0].text && picture.comments[0].date) {
+            let date = new Date(picture.comments[0].date);
+            console.log(date)
+            dateSpan.innerHTML = `<div class="comment"><span>${date.getDate()}. ${date.getMonth() + 1}. ${date.getFullYear()}</span></div>`;
+            dateSpan.innerHTML += `<div class="comment"><p>${picture.comments[0].text}</p></div>`;
+          }
         })
         .catch(err => console.log(err));
     }
   }
 
-let gallery = document.querySelector('.gallery');
-let bigPic = document.querySelector('.modal-content-container img');
-let modal = document.querySelector('.modal');
+  let gallery = document.querySelector('.gallery');
+  let bigPic = document.querySelector('.modal-content-container img');
+  let modal = document.querySelector('.modal');
 
-gallery.addEventListener('click', event => {
-  let target = event.target;
-  let currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${target.dataset.id}`;
-  console.log(currentRequest)
-  bigImgObject(target, currentRequest);
-})
+  gallery.addEventListener('click', event => {
+    let target = event.target;
+    let currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${target.dataset.id}`;
+    console.log(currentRequest)
+    bigImgObject(target, currentRequest);
+  })
 
-const modalClose = document.querySelector('.modal-window a');
+  const modalClose = document.querySelector('.modal-window a');
 
-modalClose.addEventListener('click', event => {
-  const modal = document.querySelector('.modal');
-  modal.style.display = 'none';
+  modalClose.addEventListener('click', event => {
+    const modal = document.querySelector('.modal');
+    modal.style.display = 'none';
 
-  const dateSpan = document.querySelector('.modal-comment-container');
-  dateSpan.innerHTML = '';
-  bigPic.src = '';
-  event.preventDefault();
-})
+    const dateSpan = document.querySelector('.modal-comment-container');
+    dateSpan.innerHTML = '';
+    bigPic.src = '';
+    event.preventDefault();
+  })
 
-const formSubmit = document.querySelector('form');
+  const formSubmit = document.querySelector('form');
 
-formSubmit.addEventListener('submit', event => {
-  event.preventDefault();
-  const bigPic = document.querySelector('.modal-content-container img');
-  const usernameField = document.querySelector('.modal-content-container input[name="username"]');
-  const commentField = document.querySelector('.modal-content-container input[name="comment"]');
+  formSubmit.addEventListener('submit', event => {
+    event.preventDefault();
+    const bigPic = document.querySelector('.modal-content-container img');
+    const usernameField = document.querySelector('.modal-content-container input[name="username"]');
+    const commentField = document.querySelector('.modal-content-container input[name="comment"]');
 
-  const data = {
-    name: usernameField.value,
-    comment: commentField.value
-  }
+    const data = {
+      name: usernameField.value,
+      comment: commentField.value
+    }
 
-  const currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${bigPic.dataset.id}/comments`;
-  let response = fetch(currentRequest, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(data)
-  });
+    const currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${bigPic.dataset.id}/comments`;
+    let response = fetch(currentRequest, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data)
+    });
 
-  console.log(response);
-  console.log(currentRequest);
-  usernameField.value = '';
-  commentField.value = '';
-})
+    console.log(response);
+    console.log(currentRequest);
+    usernameField.value = '';
+    commentField.value = '';
+  })
 
 
 });
