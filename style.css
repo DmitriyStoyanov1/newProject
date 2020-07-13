@@ -1,18 +1,25 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
   background: #E5E5E5;
 }
 
-body * {
-  box-sizing: border-box;
+body.modal-is-open {
+  overflow: hidden;
+}
+
+.hidden {
+  display: none;
 }
 
 .main {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: min-content 1fr min-content;
   margin: 40px auto;
-  position: relative;
   width: 768px;
   height: 828px;
   background: #FFFFFF;
@@ -34,29 +41,74 @@ header .logo {
   padding-top: 15px;
 }
 
+.preloader,
+.preloader:before,
+.preloader:after {
+  background: #c5cae9;
+  animation: load1 1s infinite ease-in-out;
+  width: 1em;
+  height: 4em;
+}
+.preloader {
+  color: #c5cae9;
+  position: relative;
+  font-size: 11px;
+  transform: translateZ(0);
+  animation-delay: -0.16s;
+}
+.preloader:before,
+.preloader:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+.preloader:before {
+  left: -1.5em;
+  animation-delay: -0.32s;
+}
+.preloader:after {
+  left: 1.5em;
+}
+
+@keyframes load1 {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 0;
+    height: 4em;
+  }
+  40% {
+    box-shadow: 0 -2em;
+    height: 5em;
+  }
+}
+
+
 .gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: min-content;
+  grid-gap: 8px;
+  position: relative;
   width: 728px;
   margin: 0 auto;
 }
 
-.gallery img {
-  width: 229px;
-  height: 142px;
-  background: #C4C4C4;
-}
-
-.row-1,
-.row-2 {
+.gallery.loading {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
+  align-items: center;
 }
 
-.row-2 {
-  margin-top: 30px;
+.gallery img {
+  width: 100%;
+  height: auto;
+  background: #C4C4C4;
 }
 
 footer {
   width: 728px;
+  margin: 0 auto;
   display: flex;
   justify-content: center;
   align-self: center;
@@ -76,6 +128,8 @@ footer .foot-logo {
 }
 
 .modal {
+  align-items: center;
+  justify-content: center;
   position: absolute;
   top: 0;
   right: 0;
@@ -86,19 +140,14 @@ footer .foot-logo {
 }
 
 .modal-window {
+  display: grid;
+  padding: 24px;
   position: relative;
   background: white;
-  width: 619px;
-  height: 425px;
-  margin-left: 74px;
-  margin-top: 181px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  min-width: 600px;
+  height: 480px;
 
-  font-family: Roboto;
-  font-style: normal;
-  font-weight: normal;
+  font-family: 'Roboto Condensed';
   font-size: 13px;
   line-height: 15px;
 }
@@ -109,26 +158,30 @@ footer .foot-logo {
   right: 21px;
 }
 
-.modal-content-container {
-  width: 331px;
-  height: 365px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+.modal-content {
+  display: grid;
+  grid-template-columns: 360px 180px;
+  grid-template-rows: auto;
+  grid-template-areas:
+  "image comments"
+  "form .";
 }
 
-.modal-comment-container {
-  width: 228px;
-  height: 365px;
+.modal-content form {
+  grid-area: form;
 }
 
-.modal-content-container img {
+.modal-content .modal-comments {
+  grid-area: comments;
+}
+
+.modal-content img {
   width: 100%;
-  height: 205px;
-  background: #C4C4C4;
+  height: auto;
+  grid-area: image;
 }
 
-.modal-content-container input {
+.modal-content input {
   width: 100%;
   height: 30px;
   background: #FFFFFF;
@@ -137,7 +190,6 @@ footer .foot-logo {
   border-radius: 3px;
   display: flex;
   align-items: center;
-  color: #CCCCCC;
   padding-left: 11px;
   margin-bottom: 20px;
 }
@@ -146,7 +198,7 @@ input::placeholder {
   color: #CCCCCC;
 }
 
-.modal-content-container button {
+.modal-content button {
   width: 100%;
   height: 30px;
   background: #4997D0;
@@ -159,14 +211,18 @@ input::placeholder {
   cursor: pointer;
 }
 
-.modal-comment-container .comment span {
+.modal-comments {
+  overflow: scroll;
+}
+
+.modal-comments .comment .date {
   color: #999999;
   display: block;
   margin-bottom: 5px;
   margin-top: 5px;
 }
 
-.modal-comment-container .comment p {
+.modal-comments .comment .text {
   color: #000000;
   margin: 0;
 }
@@ -178,4 +234,64 @@ input::placeholder {
 
 .comment:not(:last-child) {
   margin-bottom: 20px;
+}
+
+@media (max-width: 480px) {
+  .main,
+  .gallery,
+  footer {
+    width: auto;
+  }
+
+  .main {
+    min-height: 100vh;
+    padding: 0 24px;
+    height: auto;
+    margin: 0;
+  }
+
+  .main header {
+    height: 80px
+  }
+
+  .gallery {
+    margin: 0 0 80px 0;
+    grid-template-columns: 1fr;
+    grid-gap: 32px;
+  }
+
+  footer {
+    width: 100%;
+  }
+
+  .modal {
+    position: fixed;
+    background-color: #fff;
+    overflow: scroll;
+  }
+
+  .modal-window {
+    min-width: auto;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+  }
+
+  .modal-content {
+    grid-template-columns: 1fr;
+    grid-template-rows: min-content;
+    grid-template-areas:
+    "image"
+    "comments"
+    "form";
+  }
+
+  .modal-comments,
+  .modal-content form {
+    padding: 16px;
+  }
+
+  .modal-comments .comment {
+    margin-left: 0;
+  }
 }

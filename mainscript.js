@@ -2,8 +2,16 @@ const photosRequest = 'https://boiling-refuge-66454.herokuapp.com/images';
 
 document.addEventListener("DOMContentLoaded", function (event) {
 
-  let firstRowImgs = document.querySelectorAll('.row-1 img');
-  let secondRowImgs = document.querySelectorAll('.row-2 img');
+  const gallery = document.querySelector('.gallery');
+  const galleryPreloader = document.querySelector('.gallery .preloader');
+
+  const body = document.querySelector('body');
+  const modal = document.querySelector('.modal');
+  const modalImage = document.querySelector('.modal img');
+  const modalComments = document.querySelector('.modal .modal-comments');
+  const modalClose = document.querySelector('.modal-window a');
+
+  const formSubmit = document.querySelector('form');
 
   function sendRequest(method, url) {
     return fetch(url).then(response => {
@@ -11,104 +19,128 @@ document.addEventListener("DOMContentLoaded", function (event) {
     })
   }
 
-  const imgObject = sendRequest('GET', photosRequest)
-    .then(pictures => {
-      let firstRowImgs = document.querySelectorAll('.row-1 img');
-      let secondRowImgs = document.querySelectorAll('.row-2 img');
-
-      for (let i = 0; i < pictures.length; i++) {
-        if (i < 3) {
-          firstRowImgs[i].src = pictures[i].url;
-          firstRowImgs[i].dataset.id = pictures[i].id;
-        } else {
-          secondRowImgs[i - 3].src = pictures[i].url;
-          secondRowImgs[i - 3].dataset.id = pictures[i].id;
-        }
-      }
-      console.log(pictures)
-    })
-    .catch(err => console.log(err));
-
-  const bigImgObject = function (target, currentRequest) {
-    if (target.tagName === 'IMG') {
-      const modal = document.querySelector('.modal');
-      modal.style.display = 'block';
-      const bigPicRequest = sendRequest('GET', currentRequest)
-        .then(picture => {
-          bigPic.src = picture.url;
-          bigPic.dataset.id = picture.id;
-          console.log(picture)
-
-          const dateSpan = document.querySelector('.modal-comment-container');
-          if (picture.comments[0].text && picture.comments[0].date) {
-            let date = new Date(picture.comments[0].date);
-            console.log(date)
-            dateSpan.innerHTML = `<div class="comment"><span>${date.getDate()}. ${date.getMonth() + 1}. ${date.getFullYear()}</span></div>`;
-            dateSpan.innerHTML += `<div class="comment"><p>${picture.comments[0].text}</p></div>`;
-          }
-        })
-        .catch(err => console.log(err));
+  function toggleModal() {
+    if(modal.style.display === 'none') {
+      body.classList.add('modal-is-open');
+      modal.style.display = 'flex';
+    } else {
+      body.classList.remove('modal-is-open');
+      modal.style.display = 'none';
     }
   }
 
-  let gallery = document.querySelector('.gallery');
-  let bigPic = document.querySelector('.modal-content-container img');
-  let modal = document.querySelector('.modal');
+  function renderModalComments(comment) {
+    let modalCommentsContent = modalComments.innerHTML;
+
+    const currentDate = new Date()
+    const date = currentDate.toISOString().slice(0,10).replace(/-/g,".").split('.').reverse().join('.');
+
+    const newComment = `
+      <div class="comment">
+        <div class="date">${date}</div>
+        <p class="text">${comment.comment}</p>
+      </div>
+    `
+
+    modalCommentsContent += newComment
+
+    modalComments.innerHTML = modalCommentsContent
+  }
+
+  
+
+  // Грузим галерею с картинками
+  sendRequest('GET', photosRequest)
+    .then(pictures => {
+      const imagesMarkup = pictures.reduce((total, current) => {
+        return total += `<img src="${current.url}" data-id="${current.id}" data-toggle="modal" data-target="#exampleModal" />`
+      }, '')
+
+      gallery.innerHTML = imagesMarkup
+
+      gallery.classList.remove('loading')
+      galleryPreloader.classList.add('hidden')
+    })
+    .catch(err => console.log(err));
+
+  // Грузим отдельную картинку и комментарии к ней
+  const loadSingleImage = function (imageId) {
+    const imageEndpoint = `https://boiling-refuge-66454.herokuapp.com/images/${imageId}`;
+
+    sendRequest('GET', imageEndpoint)
+        .then(picture => {
+          modalImage.src = picture.url
+          modalImage.dataset.id = picture.id
+
+          // const dateSpan = document.querySelector('.modal-comment-container');
+          // if (picture.comments[0].text && picture.comments[0].date) {
+          //   let date = new Date(picture.comments[0].date);
+          //   console.log(date)
+          //   dateSpan.innerHTML = `<div class="comment"><span>${date.getDate()}. ${date.getMonth() + 1}. ${date.getFullYear()}</span></div>`;
+          //   dateSpan.innerHTML += `<div class="comment"><p>${picture.comments[0].text}</p></div>`;
+          // }
+        })
+        .catch(err => console.log(err));
+  }
 
   gallery.addEventListener('click', event => {
-    let target = event.target;
-    let currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${target.dataset.id}`;
-    console.log(currentRequest)
-    bigImgObject(target, currentRequest);
-  })
+    if(event.target.tagName !== 'IMG') {
+      return;
+    }
 
-  const modalClose = document.querySelector('.modal-window a');
+    const imageId = event.target.dataset.id
+
+    toggleModal()
+    loadSingleImage(imageId);
+  })
 
   modalClose.addEventListener('click', event => {
-    const modal = document.querySelector('.modal');
-    modal.style.display = 'none';
+    toggleModal()
 
-    const dateSpan = document.querySelector('.modal-comment-container');
-    dateSpan.innerHTML = '';
-    bigPic.src = '';
+
+    modalImage.src = './placeholder.png'
+    // const dateSpan = document.querySelector('.modal-comment-container');
+    // dateSpan.innerHTML = '';
+    // bigPic.src = '';
     event.preventDefault();
   })
-
-  const formSubmit = document.querySelector('form');
 
   formSubmit.addEventListener('submit', event => {
     event.preventDefault();
-    const bigPic = document.querySelector('.modal-content-container img');
-    const usernameField = document.querySelector('.modal-content-container input[name="username"]');
-    const commentField = document.querySelector('.modal-content-container input[name="comment"]');
 
-    const data = {
+    const usernameField = document.querySelector('.modal-content input[name="username"]');
+    const commentField = document.querySelector('.modal-content input[name="comment"]');
+
+    const commentData = {
       name: usernameField.value,
       comment: commentField.value
     }
 
-    const currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${bigPic.dataset.id}/comments`;
-    let response = fetch(currentRequest, {
+    const currentRequest = `https://boiling-refuge-66454.herokuapp.com/images/${modalImage.dataset.id}/comments`;
+
+    const response = fetch(currentRequest, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(commentData)
     });
 
-    console.log(response);
-    console.log(currentRequest);
-    usernameField.value = '';
-    commentField.value = '';
+    response.then(() => {
+      // Рендерим комментари
+      renderModalComments(commentData)
+      
+      // Сбрасываем значение формы
+      usernameField.value = '';
+      commentField.value = '';
+    })
   })
-
-
 });
 
-let date = new Date(1578054737927);
-console.log(date.getFullYear())
-console.log(date.getMonth() + 1)
-console.log(date.getDate())
+// let date = new Date(1578054737927);
+// console.log(date.getFullYear())
+// console.log(date.getMonth() + 1)
+// console.log(date.getDate())
 /* console.log("hello");
 
 const app = document.querySelector("#app");
